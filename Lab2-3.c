@@ -51,6 +51,28 @@ void pthreads(int threads_num) {
   }
 }
 
+// heavy_task для OpenMP
+void openmp_heavy_task() {
+    printf("id: %d\n", omp_get_thread_num());
+  int limit = 1e8;
+  for (int i = 0; i < limit; i++) {
+    sqrt(i);
+  }
+}
+
+// функция openmp
+void openmp(int thread_num) {
+  omp_set_dynamic(0);
+  printf("param: %d\n", thread_num);
+  omp_set_num_threads(thread_num);
+  printf("OpenMP threads: %d\n", omp_get_num_threads());
+  #pragma omp parallel for num_threads(thread_num)
+  for (int i = 0; i < thread_num; i++) {
+    // printf("for: %d\n", omp_get_num_threads());
+    openmp_heavy_task();
+  }
+}
+
 // последовательная версия
 void sequential(int num_tasks) {
     for (int i = 0; i < num_tasks; i++) {
@@ -84,6 +106,14 @@ int main(int argc, char **argv) {
     time_spent = ((double)(end - start)) / CLOCKS_PER_SEC;
     printf("Время выполнения Pthreads: %.2f секунд\n", time_spent);
     pthread_mutex_destroy(&mutex);
+
+    // OpenMP выполнение
+    printf("\n=== OpenMP выполнение ===\n");
+    start = clock();
+    openmp(num_tasks);
+    end = clock();
+    time_spent = ((double)(end - start)) / CLOCKS_PER_SEC;
+    printf("Время выполнения OpenMP: %.2f секунд\n", time_spent);
 
     return 0;
 }
